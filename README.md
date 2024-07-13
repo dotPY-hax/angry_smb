@@ -1,7 +1,7 @@
 # angry_smb
-Use impackets smb server as a context manager!
+Use impackets simple smb server as a context manager!
 
-Angry SMB offers a neat way to abstract running an SMB server in a tidy context manager which cleans up after itself. Additionally it offers an object oriented way to handle files within the share as well as files we expect to be in the share at some point in the future.
+Angry SMB offers a neat way to abstract running an SMB server in a tidy context manager usimg tmp files which cleans up after itself. Additionally it offers an object oriented way to handle files within the share as well as files we expect to be in the share at some point in the future.
 
 # Usage
 The following code snippet shows a multi staged attack to secretsdump from a mssql shell in Game Of Active Directory. This showcases most of the neat features Angry SMB has to offer.
