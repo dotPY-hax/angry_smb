@@ -14,13 +14,13 @@ from impacket.smbserver import SimpleSMBServer
 
 
 class TempSMB:
-    def __init__(self, local_ip, share_name="legit"):
+    def __init__(self, local_ip, share_name="legit", smb2=False):
         self.share_name = share_name
         self.local_ip = local_ip
         self.smb_dir = tempfile.mkdtemp()
         self.server = SimpleSMBServer(listenAddress=self.local_ip)
         self.server.setLogFile("")
-        self.server.setSMB2Support(True)
+        self.server.setSMB2Support(smb2)
 
         self._smb_files = {}
         self._server_process = None
@@ -101,6 +101,8 @@ class SMBFile:
         self.base_name = os.path.basename(self.local_path)
         self.friendly_name = friendly_name if friendly_name else self.base_name
         self.remote_path = os.path.join(smb_server_object.connection_string(), self.base_name)
+        self.remote_path_backslashes = self.remote_path.replace("/", "\\")
+        self.remote_path_backslashes_double = self.remote_path.replace("/", "\\\\")
 
     def exists(self):
         return os.path.exists(self.local_path)

