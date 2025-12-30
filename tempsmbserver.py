@@ -3,7 +3,6 @@
 # Additionally, it offers an object-oriented approach to handle the temporary incoming and outgoing files inside the temporary share
 # written by dotPY
 
-
 import multiprocessing
 import os
 import shutil
@@ -23,6 +22,7 @@ class TempSMB:
         self.server.setLogFile("")
         self.server.setSMB2Support(smb2)
 
+        self.credentials = {}
         if set_credentials:
             self.add_credentials()
 
@@ -100,9 +100,16 @@ class TempSMB:
 
     def add_credentials(self):
         print("ADDING CREDENTIALS!")
-        print(f"net use /user:admin Y: {self.connection_string().replace('/', '\\')[:-1]} admin")
         nthash, lmhash = compute_nthash("admin"), compute_lmhash("admin")
+        self.credentials["admin"] = "admin"
         self.server.addCredential("admin", 0, lmhash, nthash)
+        print(self.net_use_string())
+
+    def net_use_string(self):
+        user, password = list(self.credentials.items())[0]
+        net_use = f"net use /user:{user} /PERSISTENT:NO Y: {self.connection_string().replace('/', '\\')[:-1]} {password}"
+        return net_use
+
 
 class SMBFile:
     def __init__(self, smb_server_object, ext="", friendly_name=None):

