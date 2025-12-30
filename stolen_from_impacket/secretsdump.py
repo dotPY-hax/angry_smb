@@ -9,13 +9,17 @@ def dump(sam, system, security):
     local_ops = LocalOperations(system)
     boot_key = local_ops.getBootKey()
     sam_hashes = SAMHashes(sam, boot_key)
-    lsa_secrets = LSASecrets(security, boot_key)
     print("="*10+"SAM"+"="*10)
     sam_hashes.dump()
-    print("=" * 10 + "CHACHED CREDS" + "=" * 10)
-    lsa_secrets.dumpCachedHashes()
-    print("=" * 10 + "SECRETS" + "=" * 10)
-    lsa_secrets.dumpSecrets()
+    try:
+        lsa_secrets = LSASecrets(security, boot_key)
+        print("=" * 10 + "CHACHED CREDS" + "=" * 10)
+        lsa_secrets.dumpCachedHashes()
+        print("=" * 10 + "SECRETS" + "=" * 10)
+        lsa_secrets.dumpSecrets()
+        lsa_secrets.finish()
+    except Exception as e:
+        print(e)
+        print("security hive was likely not dumped")
 
     sam_hashes.finish()
-    lsa_secrets.finish()

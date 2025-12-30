@@ -23,9 +23,9 @@ class Payload:
     def generate(self):
         self.payload = "NotImplemented!!"
 
-    def await_output_files(self):
+    def await_output_files(self, timeout=None):
         for output_file in self.output_files:
-            output_file.await_me()
+            output_file.await_me(timeout=timeout)
         
 
 class PowershellFileRunner(Payload):

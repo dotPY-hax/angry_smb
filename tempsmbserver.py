@@ -11,16 +11,20 @@ import tempfile
 import time
 
 from impacket.smbserver import SimpleSMBServer
+from impacket.ntlm import compute_lmhash, compute_nthash
 
 
 class TempSMB:
-    def __init__(self, local_ip, share_name="legit", smb2=False):
+    def __init__(self, local_ip, share_name="legit", smb2=True, set_credentials=False):
         self.share_name = share_name
         self.local_ip = local_ip
         self.smb_dir = tempfile.mkdtemp()
         self.server = SimpleSMBServer(listenAddress=self.local_ip)
         self.server.setLogFile("")
         self.server.setSMB2Support(smb2)
+
+        if set_credentials:
+            self.add_credentials()
 
         self._smb_files = {}
         self._server_process = None
@@ -94,6 +98,11 @@ class TempSMB:
     def add_to_collection(self, smb_file):
         self[smb_file.friendly_name] = smb_file
 
+    def add_credentials(self):
+        print("ADDING CREDENTIALS!")
+        print(f"net use /user:admin Y: {self.connection_string().replace('/', '\\')[:-1]} admin")
+        nthash, lmhash = compute_nthash("admin"), compute_lmhash("admin")
+        self.server.addCredential("admin", 0, lmhash, nthash)
 
 class SMBFile:
     def __init__(self, smb_server_object, ext="", friendly_name=None):
