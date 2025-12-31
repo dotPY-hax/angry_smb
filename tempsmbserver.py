@@ -14,7 +14,7 @@ from impacket.ntlm import compute_lmhash, compute_nthash
 
 
 class TempSMB:
-    def __init__(self, local_ip, share_name="legit", smb2=True, set_credentials=False):
+    def __init__(self, local_ip, share_name="legit", smb2=False, set_credentials=False):
         self.share_name = share_name
         self.local_ip = local_ip
         self.smb_dir = tempfile.mkdtemp()
