@@ -146,3 +146,8 @@ class SMBFile:
                 content = content.replace(b"\xff\xfe", b"")
                 content = content.replace(b"\x00", b"")
             print(content.decode())
+
+    def string(self, cringe_utf_16=True):
+        encoding = "utf-16-le" if cringe_utf_16 else "utf-8"
+        with open(self.local_path, encoding=encoding) as f:
+            return f.read()
