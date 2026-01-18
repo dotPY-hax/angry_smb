@@ -10,8 +10,9 @@ winpeas_link = "https://raw.githubusercontent.com/peass-ng/PEASS-ng/refs/heads/m
 godpotato_link = "https://github.com/BeichenDream/GodPotato/releases/download/V1.20/GodPotato-NET4.exe"
 printspoofer_link = "https://github.com/itm4n/PrintSpoofer/releases/download/v1.0/PrintSpoofer64.exe"
 procdump_link = "https://live.sysinternals.com/procdump64.exe"
+python_link = "https://www.python.org/ftp/python/3.14.2/python-3.14.2-embed-amd64.zip"
 
-tools_to_steal = {"winpeas": winpeas_link, "godpotato": godpotato_link, "printspoofer": printspoofer_link, "procdump": procdump_link}
+tools_to_steal = {"winpeas": winpeas_link, "godpotato": godpotato_link, "printspoofer": printspoofer_link, "procdump": procdump_link, "python": python_link}
 
 usetmp = True
 
@@ -51,3 +52,6 @@ def provide_privilege_token(privilege_name):
     privilege_token_path = os.path.join(pathlib.Path(__file__).parent, "privilege_token.ps1")
     with open(privilege_token_path) as f:
         return f.read().replace("{{PRIVILEGE_GOES_HERE}}", privilege_name)
+
+def provide_python_interpreter():
+    return provide_tool("python")
